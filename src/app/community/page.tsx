@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { posts as initialPosts, lawyers } from '@/data/mockData';
-import { Image as ImageIcon, Tag, MapPin, MessageSquare, Share2, Bookmark, MoreHorizontal, User, Menu, X } from 'lucide-react';
+import { Image as ImageIcon, Tag, MapPin, MessageSquare, Share2, Bookmark, MoreHorizontal, User, Menu, X, Search, ThumbsUp, MessageCircleQuestion, Frown, Eye, Lightbulb, CircleHelp, Calendar, Globe, Send, HelpCircle } from 'lucide-react';
+
 
 function Header() {
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -23,9 +24,12 @@ function Header() {
                         <Link href="/auth/login" style={{ padding: '10px 20px', borderRadius: 14, fontSize: 14, fontWeight: 600, color: '#475569', border: '1px solid #E2E8F0' }}>Sign In</Link>
                         <Link href="/auth/register-lawyer" style={{ padding: '10px 20px', borderRadius: 14, fontSize: 14, fontWeight: 600, color: '#fff', background: '#1D4ED8' }}>Join as Lawyer</Link>
                     </div>
-                    <button className="mobile-only" onClick={() => setMobileOpen(!mobileOpen)} style={{ width: 44, height: 44, borderRadius: 12, display: 'none', alignItems: 'center', justifyContent: 'center', background: '#F1F5F9', color: '#0F172A' }}>
-                        <Menu size={24} />
-                    </button>
+                    <div className="mobile-only" style={{ display: 'none', alignItems: 'center', gap: 12 }}>
+                        <Link href="/find-lawyers" style={{ color: '#0F172A', display: 'flex' }}><Search size={22} /></Link>
+                        <button onClick={() => setMobileOpen(!mobileOpen)} style={{ width: 44, height: 44, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F1F5F9', color: '#0F172A', border: 'none' }}>
+                            <Menu size={24} />
+                        </button>
+                    </div>
                 </div>
             </header>
             {mobileOpen && (
@@ -44,13 +48,44 @@ function Header() {
     );
 }
 
-const reactions = ['👏', '🤔', '😢', '😮', '💡'];
+const reactions = [
+    { id: 'clap', emoji: '👏', icon: ThumbsUp },
+    { id: 'interesting', emoji: '💡', icon: Lightbulb },
+    { id: 'sad', emoji: '😢', icon: Frown },
+    { id: 'surprised', emoji: '😮', icon: Eye },
+    { id: 'question', emoji: '🤔', icon: MessageCircleQuestion }
+];
 const categories = ['All', 'Criminal Law', 'Family Law', 'Corporate Law', 'Property Law', 'Cyber Law', 'Labor Law', 'Immigration', 'Consumer Rights', 'Constitutional Law'];
 const trending = ['#KnowYourRights', '#LegalTips', '#CriminalLaw', '#FamilyLaw', '#StartupLaw', '#CyberLaw', '#LaborRights', '#Immigration'];
 
+interface Post {
+    id: number;
+    authorId: number;
+    authorName: string;
+    authorType: string;
+    authorPhoto: string;
+    timestamp: string;
+    category: string;
+    country?: string;
+    text: string;
+    tags: string[];
+    reactions: {
+        clap: number;
+        interesting: number;
+        wow?: number;
+        sad?: number;
+        [key: string]: number | undefined;
+    };
+    commentCount: number;
+    shareCount: number;
+    imageUrl?: string | null;
+    isQuestion?: boolean;
+    isEvent?: boolean;
+}
+
 export default function CommunityPage() {
     const [selectedCategory, setSelectedCategory] = useState('All');
-    const [feedPosts, setFeedPosts] = useState(initialPosts);
+    const [feedPosts, setFeedPosts] = useState<Post[]>(initialPosts as Post[]);
     const [newPostText, setNewPostText] = useState('');
     const [postReactions, setPostReactions] = useState<Record<number, string[]>>({});
 
@@ -60,6 +95,12 @@ export default function CommunityPage() {
     const [menuOpenId, setMenuOpenId] = useState<number | null>(null);
     const [editingPostId, setEditingPostId] = useState<number | null>(null);
     const [editingText, setEditingText] = useState('');
+
+    // Comments states
+    const [openComments, setOpenComments] = useState<Record<number, boolean>>({});
+    const [postComments, setPostComments] = useState<Record<number, any[]>>({});
+    const [commentTexts, setCommentTexts] = useState<Record<number, string>>({});
+    const [commentImages, setCommentImages] = useState<Record<number, string | null>>({});
 
     const handleReaction = (postId: number, emoji: string) => {
         setPostReactions(prev => {
@@ -85,6 +126,7 @@ export default function CommunityPage() {
             reactions: { clap: 0, interesting: 0, wow: 0 },
             commentCount: 0,
             shareCount: 0,
+            imageUrl: imageFile,
         };
         setFeedPosts([newPost, ...feedPosts]);
         setNewPostText('');
@@ -92,9 +134,50 @@ export default function CommunityPage() {
         setSelectedPostTags([]);
     };
 
-    const handleImageUpload = () => {
-        // Mock image upload
-        setImageFile('https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=800');
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                setImageFile(ev.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleCommentImageUpload = (postId: number, e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                setCommentImages(prev => ({ ...prev, [postId]: ev.target?.result as string }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const submitComment = (postId: number) => {
+        const text = commentTexts[postId] || '';
+        const image = commentImages[postId];
+        if (!text.trim() && !image) return;
+
+        const newComment = {
+            id: Date.now(),
+            text,
+            imageUrl: image,
+            authorName: 'Guest User',
+            authorPhoto: 'https://ui-avatars.com/api/?name=Guest+User&background=F1F5F9&color=64748B',
+            timestamp: 'Just now'
+        };
+
+        setPostComments(prev => ({
+            ...prev,
+            [postId]: [...(prev[postId] || []), newComment]
+        }));
+
+        setFeedPosts(prev => prev.map(p => p.id === postId ? { ...p, commentCount: p.commentCount + 1 } : p));
+        setCommentTexts(prev => ({ ...prev, [postId]: '' }));
+        setCommentImages(prev => ({ ...prev, [postId]: null }));
     };
 
     const toggleTag = (tag: string) => {
@@ -185,9 +268,10 @@ export default function CommunityPage() {
                                     </div>
                                 )}
                                 <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-                                    <button onClick={handleImageUpload} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 500, color: imageFile ? '#1D4ED8' : '#64748B' }}>
+                                    <input type="file" id="postImageUpload" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} />
+                                    <label htmlFor="postImageUpload" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 500, color: imageFile ? '#1D4ED8' : '#64748B', cursor: 'pointer' }}>
                                         <ImageIcon size={16} /> Image
-                                    </button>
+                                    </label>
                                     <button onClick={() => toggleTag('#LegalHelp')} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 500, color: selectedPostTags.includes('#LegalHelp') ? '#1D4ED8' : '#64748B' }}>
                                         <Tag size={16} /> Tag
                                     </button>
@@ -216,7 +300,7 @@ export default function CommunityPage() {
                                                 <span style={{ fontSize: 12, color: '#64748B' }}>{p.timestamp}</span>
                                                 <span style={{ fontSize: 12, color: '#94A3B8' }}>·</span>
                                                 <span style={{ fontSize: 12, color: '#1D4ED8', fontWeight: 500 }}>{p.category}</span>
-                                                {p.country && <><span style={{ fontSize: 12, color: '#94A3B8' }}>·</span><span style={{ fontSize: 12, color: '#64748B' }}>🌍 {p.country}</span></>}
+                                                {p.country && <><span style={{ fontSize: 12, color: '#94A3B8' }}>·</span><span style={{ fontSize: 12, color: '#64748B', display: 'flex', alignItems: 'center', gap: 4 }}><Globe size={12} /> {p.country}</span></>}
                                             </div>
                                         </div>
                                         <div style={{ position: 'relative' }}>
@@ -240,10 +324,10 @@ export default function CommunityPage() {
 
                                     {/* Post badges */}
                                     {'isQuestion' in p && p.isQuestion && (
-                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 12px', borderRadius: 999, background: '#FEF3C7', color: '#92400E', fontSize: 12, fontWeight: 600, marginBottom: 12 }}>❓ Question</div>
+                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 12px', borderRadius: 999, background: '#FEF3C7', color: '#92400E', fontSize: 12, fontWeight: 600, marginBottom: 12 }}><HelpCircle size={14} /> Question</div>
                                     )}
                                     {'isEvent' in p && p.isEvent && (
-                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 12px', borderRadius: 999, background: '#DBEAFE', color: '#1D4ED8', fontSize: 12, fontWeight: 600, marginBottom: 12 }}>📅 Event</div>
+                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 12px', borderRadius: 999, background: '#DBEAFE', color: '#1D4ED8', fontSize: 12, fontWeight: 600, marginBottom: 12 }}><Calendar size={14} /> Event</div>
                                     )}
 
                                     {/* Content */}
@@ -256,7 +340,10 @@ export default function CommunityPage() {
                                             </div>
                                         </div>
                                     ) : (
-                                        <p style={{ fontSize: 15, color: '#334155', lineHeight: 1.8, marginBottom: 16, whiteSpace: 'pre-line' }}>{p.text}</p>
+                                        <>
+                                            <p style={{ fontSize: 15, color: '#334155', lineHeight: 1.8, marginBottom: 16, whiteSpace: 'pre-line' }}>{p.text}</p>
+                                            {p.imageUrl && <img src={p.imageUrl} alt="Post image" style={{ width: '100%', borderRadius: 16, marginBottom: 16 }} />}
+                                        </>
                                     )}
 
                                     {/* Tags */}
@@ -267,7 +354,11 @@ export default function CommunityPage() {
                                     {/* Action Stats */}
                                     <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: 12, marginBottom: 12 }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#64748B' }}>
-                                            <span>👏 {p.reactions.clap + ((postReactions[p.id] || []).includes('👏') ? 1 : 0)}{p.reactions.interesting ? ` · 💡 ${p.reactions.interesting + ((postReactions[p.id] || []).includes('💡') ? 1 : 0)}` : ''}</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                <ThumbsUp size={14} color="#64748B" />
+                                                <span>{p.reactions.clap + ((postReactions[p.id] || []).includes('clap') ? 1 : 0)}</span>
+                                                {p.reactions.interesting > 0 && <><span style={{ color: '#94A3B8' }}>·</span> <Lightbulb size={14} color="#64748B" /> <span>{p.reactions.interesting + ((postReactions[p.id] || []).includes('interesting') ? 1 : 0)}</span></>}
+                                            </div>
                                             <span>{p.commentCount} comments · {p.shareCount} shares</span>
                                         </div>
                                     </div>
@@ -275,27 +366,72 @@ export default function CommunityPage() {
                                     {/* Action Bar */}
                                     <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: 12, display: 'flex', justifyContent: 'space-between' }}>
                                         <div style={{ display: 'flex', gap: 4 }}>
-                                            {reactions.map(emoji => (
-                                                <button key={emoji} onClick={() => handleReaction(p.id, emoji)} className="btn-press" style={{
-                                                    width: 36, height: 36, borderRadius: 10, fontSize: 16,
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    background: (postReactions[p.id] || []).includes(emoji) ? '#EEF2FF' : 'transparent',
-                                                    transition: 'all 0.2s',
-                                                }}>{emoji}</button>
-                                            ))}
+                                            {reactions.map(r => {
+                                                const Icon = r.icon;
+                                                const isActive = (postReactions[p.id] || []).includes(r.id);
+                                                return (
+                                                    <button key={r.id} onClick={() => handleReaction(p.id, r.id)} className="btn-press" style={{
+                                                        width: 36, height: 36, borderRadius: 10, fontSize: 16, border: 'none',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        background: isActive ? '#EEF2FF' : 'transparent', color: isActive ? '#1D4ED8' : '#64748B',
+                                                        transition: 'all 0.2s', cursor: 'pointer'
+                                                    }}><Icon size={18} /></button>
+                                                )
+                                            })}
                                         </div>
                                         <div style={{ display: 'flex', gap: 8 }}>
-                                            <button style={{ fontSize: 13, fontWeight: 500, color: '#64748B', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <button onClick={() => setOpenComments(prev => ({ ...prev, [p.id]: !prev[p.id] }))} style={{ fontSize: 13, fontWeight: 500, color: '#64748B', display: 'flex', alignItems: 'center', gap: 6, border: 'none', background: 'transparent', cursor: 'pointer' }}>
                                                 <MessageSquare size={16} /> Comment
                                             </button>
-                                            <button style={{ fontSize: 13, fontWeight: 500, color: '#64748B', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <button style={{ fontSize: 13, fontWeight: 500, color: '#64748B', display: 'flex', alignItems: 'center', gap: 6, border: 'none', background: 'transparent', cursor: 'pointer' }}>
                                                 <Share2 size={16} /> Share
                                             </button>
-                                            <button style={{ fontSize: 13, fontWeight: 500, color: '#64748B', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <button style={{ fontSize: 13, fontWeight: 500, color: '#64748B', display: 'flex', alignItems: 'center', gap: 6, border: 'none', background: 'transparent', cursor: 'pointer' }}>
                                                 <Bookmark size={16} /> Save
                                             </button>
                                         </div>
                                     </div>
+
+                                    {/* Comments Section */}
+                                    {openComments[p.id] && (
+                                        <div style={{ marginTop: 16, borderTop: '1px solid #F1F5F9', paddingTop: 16 }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
+                                                {(postComments[p.id] || []).map(c => (
+                                                    <div key={c.id} style={{ display: 'flex', gap: 12 }}>
+                                                        <img src={c.authorPhoto} alt={c.authorName} style={{ width: 32, height: 32, borderRadius: '50%' }} />
+                                                        <div style={{ flex: 1, background: '#F8FAFC', borderRadius: 16, padding: '10px 14px' }}>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                                                                <span style={{ fontSize: 13, fontWeight: 600, color: '#0F172A' }}>{c.authorName}</span>
+                                                                <span style={{ fontSize: 11, color: '#64748B' }}>{c.timestamp}</span>
+                                                            </div>
+                                                            <p style={{ fontSize: 13, color: '#334155', whiteSpace: 'pre-line' }}>{c.text}</p>
+                                                            {c.imageUrl && <img src={c.imageUrl} alt="Comment image" style={{ width: '100%', maxWidth: 200, borderRadius: 8, marginTop: 8 }} />}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                                                <img src="https://ui-avatars.com/api/?name=Guest+User&background=F1F5F9&color=64748B" alt="User" style={{ width: 32, height: 32, borderRadius: '50%' }} />
+                                                <div style={{ flex: 1, background: '#F8FAFC', borderRadius: 20, border: '1px solid #E2E8F0', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                    <input value={commentTexts[p.id] || ''} onChange={e => setCommentTexts(prev => ({ ...prev, [p.id]: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') submitComment(p.id) }} placeholder="Write a comment..." style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', fontSize: 14 }} />
+
+                                                    <input type="file" id={`commentImageUpload-${p.id}`} accept="image/*" style={{ display: 'none' }} onChange={e => handleCommentImageUpload(p.id, e)} />
+                                                    <label htmlFor={`commentImageUpload-${p.id}`} style={{ cursor: 'pointer', color: commentImages[p.id] ? '#1D4ED8' : '#94A3B8', display: 'flex', alignItems: 'center' }}>
+                                                        <ImageIcon size={18} />
+                                                    </label>
+                                                    <button onClick={() => submitComment(p.id)} style={{ background: '#1D4ED8', color: '#fff', border: 'none', borderRadius: '50%', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                                                        <Send size={14} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            {commentImages[p.id] && (
+                                                <div style={{ marginLeft: 44, marginTop: 8, position: 'relative', display: 'inline-block' }}>
+                                                    <img src={commentImages[p.id]!} alt="Preview" style={{ height: 60, borderRadius: 8 }} />
+                                                    <button onClick={() => setCommentImages(prev => ({ ...prev, [p.id]: null }))} style={{ position: 'absolute', top: -6, right: -6, background: '#EF4444', color: '#fff', border: 'none', borderRadius: '50%', padding: 2, cursor: 'pointer' }}><X size={12} /></button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </article>
                             ))}
                         </div>

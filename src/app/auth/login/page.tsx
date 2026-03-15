@@ -1,9 +1,11 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { CheckCircle2, MessageSquare, Heart, BarChart2, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
+    const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -40,7 +42,14 @@ export default function LoginPage() {
                     <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 28, fontWeight: 700, color: '#0F172A', marginBottom: 8 }}>Sign in</h2>
                     <p style={{ fontSize: 15, color: '#64748B', marginBottom: 32 }}>Enter your credentials to access your account</p>
 
-                    <form onSubmit={e => e.preventDefault()} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <form onSubmit={e => {
+                        e.preventDefault();
+                        if (email === 'admin@lawz.com' || email === 'admin') {
+                            router.push('/admin');
+                        } else {
+                            router.push('/');
+                        }
+                    }} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                         <div>
                             <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', display: 'block', marginBottom: 6 }}>Email address</label>
                             <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com" style={{

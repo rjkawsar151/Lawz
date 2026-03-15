@@ -1,5 +1,6 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { lawyers, practiceAreas, courts } from '@/data/mockData';
 import { Search, SlidersHorizontal, MapPin, Star, Clock, CheckCircle2, Heart, Menu, X } from 'lucide-react';
@@ -29,9 +30,12 @@ function Header() {
                         <Link href="/auth/login" style={{ padding: '10px 20px', borderRadius: 14, fontSize: 14, fontWeight: 600, color: '#475569', border: '1px solid #E2E8F0' }}>Sign In</Link>
                         <Link href="/auth/register-lawyer" style={{ padding: '10px 20px', borderRadius: 14, fontSize: 14, fontWeight: 600, color: '#fff', background: '#1D4ED8' }}>Join as Lawyer</Link>
                     </div>
-                    <button className="mobile-only" onClick={() => setMobileOpen(!mobileOpen)} style={{ width: 44, height: 44, borderRadius: 12, display: 'none', alignItems: 'center', justifyContent: 'center', background: '#F1F5F9', color: '#0F172A' }}>
-                        <Menu size={24} />
-                    </button>
+                    <div className="mobile-only" style={{ display: 'none', alignItems: 'center', gap: 12 }}>
+                        <Link href="/find-lawyers" style={{ color: '#0F172A', display: 'flex' }}><Search size={22} /></Link>
+                        <button onClick={() => setMobileOpen(!mobileOpen)} style={{ width: 44, height: 44, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F1F5F9', color: '#0F172A', border: 'none' }}>
+                            <Menu size={24} />
+                        </button>
+                    </div>
                 </div>
             </header>
             {mobileOpen && (
@@ -67,8 +71,14 @@ function Footer() {
     );
 }
 
-export default function FindLawyersPage() {
+function FindLawyersContent() {
+    const searchParams = useSearchParams();
     const [search, setSearch] = useState('');
+
+    useEffect(() => {
+        const query = searchParams.get('s');
+        if (query) setSearch(query);
+    }, [searchParams]);
     const [selectedArea, setSelectedArea] = useState('');
     const [selectedCourt, setSelectedCourt] = useState('');
     const [sortBy, setSortBy] = useState('relevance');
@@ -311,5 +321,13 @@ export default function FindLawyersPage() {
         }
       `}</style>
         </>
+    );
+}
+
+export default function FindLawyersPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <FindLawyersContent />
+        </Suspense>
     );
 }

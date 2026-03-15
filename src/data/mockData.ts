@@ -1,16 +1,16 @@
 export const practiceAreas = [
-    { id: 1, name: 'Family Law', icon: '👨‍👩‍👧‍👦', description: 'Divorce, custody, adoption, and domestic matters', count: 342 },
-    { id: 2, name: 'Criminal Law', icon: '⚖️', description: 'Criminal defense, bail, appeals, and representation', count: 289 },
-    { id: 3, name: 'Civil Litigation', icon: '📋', description: 'Disputes, claims, injunctions, and civil remedies', count: 256 },
-    { id: 4, name: 'Corporate Law', icon: '🏢', description: 'Business formation, compliance, mergers, and contracts', count: 198 },
-    { id: 5, name: 'Property Law', icon: '🏠', description: 'Real estate, land disputes, title transfers, and tenancy', count: 312 },
-    { id: 6, name: 'Tax Law', icon: '💰', description: 'Tax disputes, planning, VAT, and corporate taxation', count: 145 },
-    { id: 7, name: 'Labor Law', icon: '👷', description: 'Employee rights, workplace disputes, and compensation', count: 178 },
-    { id: 8, name: 'Cyber Law', icon: '💻', description: 'Digital crimes, data protection, and online disputes', count: 89 },
-    { id: 9, name: 'Immigration', icon: '✈️', description: 'Visas, citizenship, asylum, and work permits', count: 167 },
-    { id: 10, name: 'Banking & Finance', icon: '🏦', description: 'Banking disputes, loan recovery, and financial regulation', count: 134 },
-    { id: 11, name: 'Intellectual Property', icon: '💡', description: 'Patents, trademarks, copyrights, and trade secrets', count: 112 },
-    { id: 12, name: 'Consumer Rights', icon: '🛡️', description: 'Product liability, fraud, unfair trade, and complaints', count: 203 },
+    { id: 1, name: 'Family Law', icon: 'Users', description: 'Divorce, custody, adoption, and domestic matters', count: 342 },
+    { id: 2, name: 'Criminal Law', icon: 'Gavel', description: 'Criminal defense, bail, appeals, and representation', count: 289 },
+    { id: 3, name: 'Civil Litigation', icon: 'FileText', description: 'Disputes, claims, injunctions, and civil remedies', count: 256 },
+    { id: 4, name: 'Corporate Law', icon: 'Briefcase', description: 'Business formation, compliance, mergers, and contracts', count: 198 },
+    { id: 5, name: 'Property Law', icon: 'Home', description: 'Real estate, land disputes, title transfers, and tenancy', count: 312 },
+    { id: 6, name: 'Tax Law', icon: 'Banknote', description: 'Tax disputes, planning, VAT, and corporate taxation', count: 145 },
+    { id: 7, name: 'Labor Law', icon: 'HardHat', description: 'Employee rights, workplace disputes, and compensation', count: 178 },
+    { id: 8, name: 'Cyber Law', icon: 'Shield', description: 'Digital crimes, data protection, and online disputes', count: 89 },
+    { id: 9, name: 'Immigration', icon: 'Plane', description: 'Visas, citizenship, asylum, and work permits', count: 167 },
+    { id: 10, name: 'Banking & Finance', icon: 'Landmark', description: 'Banking disputes, loan recovery, and financial regulation', count: 134 },
+    { id: 11, name: 'Intellectual Property', icon: 'Lightbulb', description: 'Patents, trademarks, copyrights, and trade secrets', count: 112 },
+    { id: 12, name: 'Consumer Rights', icon: 'ShieldCheck', description: 'Product liability, fraud, unfair trade, and complaints', count: 203 },
 ];
 
 export const courts = [

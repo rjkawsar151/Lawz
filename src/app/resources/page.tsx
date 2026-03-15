@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import { Search, Menu, X, BookOpen, ArrowRight, FileText, CheckSquare, FileSignature, HelpCircle } from 'lucide-react';
+
 
 function Header() {
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -19,14 +21,27 @@ function Header() {
                     </nav>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }} className="desktop-nav">
                         <Link href="/auth/login" style={{ padding: '10px 20px', borderRadius: 14, fontSize: 14, fontWeight: 600, color: '#475569', border: '1px solid #E2E8F0' }}>Sign In</Link>
+                        <Link href="/auth/register-lawyer" style={{ padding: '10px 20px', borderRadius: 14, fontSize: 14, fontWeight: 600, color: '#fff', background: '#1D4ED8' }}>Join as Lawyer</Link>
                     </div>
-                    <button className="mobile-only" onClick={() => setMobileOpen(!mobileOpen)} style={{ width: 44, height: 44, borderRadius: 12, display: 'none', alignItems: 'center', justifyContent: 'center', background: '#F1F5F9' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                            <span style={{ width: 20, height: 2, background: '#0F172A', borderRadius: 2 }} /><span style={{ width: 20, height: 2, background: '#0F172A', borderRadius: 2 }} /><span style={{ width: 20, height: 2, background: '#0F172A', borderRadius: 2 }} />
-                        </div>
-                    </button>
+                    <div className="mobile-only" style={{ display: 'none', alignItems: 'center', gap: 12 }}>
+                        <Link href="/find-lawyers" style={{ color: '#0F172A', display: 'flex' }}><Search size={22} /></Link>
+                        <button onClick={() => setMobileOpen(!mobileOpen)} style={{ width: 44, height: 44, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F1F5F9', color: '#0F172A', border: 'none' }}>
+                            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+                        </button>
+                    </div>
                 </div>
             </header>
+            {mobileOpen && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 999, background: 'rgba(15,23,42,0.5)', backdropFilter: 'blur(4px)' }} onClick={() => setMobileOpen(false)}>
+                    <div style={{ position: 'absolute', top: 0, right: 0, width: '85%', maxWidth: 360, height: '100%', background: '#fff', padding: '96px 24px 24px', animation: 'slideIn 0.3s ease-out' }} onClick={e => e.stopPropagation()}>
+                        <nav style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            {[{ label: 'Home', href: '/' }, { label: 'Find Lawyers', href: '/find-lawyers' }, { label: 'Community', href: '/community' }, { label: 'Resources', href: '/resources' }].map(item => (
+                                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} style={{ padding: '14px 16px', borderRadius: 14, fontSize: 16, fontWeight: 500, color: '#0F172A', display: 'block' }}>{item.label}</Link>
+                            ))}
+                        </nav>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
@@ -64,7 +79,7 @@ export default function ResourcesPage() {
                         <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 800, color: '#fff', marginBottom: 16 }}>Legal Resources & Guides</h1>
                         <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.8)', maxWidth: 640, margin: '0 auto 32px' }}>Empowering you with knowledge. Explore free guides, articles, and checklists written by verified legal experts.</p>
                         <div style={{ maxWidth: 540, margin: '0 auto', position: 'relative' }}>
-                            <span style={{ position: 'absolute', left: 20, top: '50%', transform: 'translateY(-50%)', fontSize: 18 }}>🔍</span>
+                            <Search style={{ position: 'absolute', left: 20, top: '50%', transform: 'translateY(-50%)', color: '#64748B' }} size={20} />
                             <input placeholder="Search resources..." style={{ width: '100%', padding: '16px 20px 16px 52px', borderRadius: 16, border: 'none', fontSize: 16, boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }} />
                         </div>
                     </div>
@@ -93,7 +108,7 @@ export default function ResourcesPage() {
                                 </div>
                                 <h3 style={{ fontSize: 20, fontWeight: 700, color: '#0F172A', marginBottom: 12, lineHeight: 1.4 }}>{r.title}</h3>
                                 <p style={{ fontSize: 14, color: '#475569', lineHeight: 1.7, marginBottom: 24, flex: 1 }}>{r.desc}</p>
-                                <Link href={`/resources/${r.id}`} className="btn-press" style={{ padding: '12px', borderRadius: 14, fontSize: 14, fontWeight: 600, textAlign: 'center', color: '#1D4ED8', background: '#F8FAFC', border: '1px solid #E2E8F0' }}>Read Article →</Link>
+                                <Link href={`/resources/${r.id}`} className="btn-press" style={{ padding: '12px', borderRadius: 14, fontSize: 14, fontWeight: 600, textAlign: 'center', color: '#1D4ED8', background: '#F8FAFC', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>Read Article <ArrowRight size={16} /></Link>
                             </div>
                         ))}
                     </div>

@@ -1,8 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+
 import { lawyers, practiceAreas, posts } from '@/data/mockData';
-import { Search, Calendar, Star, Sparkles, CheckCircle2, Diamond, MessageSquare, Video, ShieldCheck, Lock, Wallet, Users, Globe, Eye, BarChart3, Trophy, MapPin, Clock, Heart, Menu, X, Gavel, Scale } from 'lucide-react';
+import { Search, Calendar, Star, Sparkles, CheckCircle2, Diamond, MessageSquare, Video, ShieldCheck, Lock, Wallet, Users, Globe, Eye, BarChart3, Trophy, MapPin, Clock, Heart, Menu, X, Gavel, Scale, FileText, Briefcase, Home, Banknote, HardHat, Shield, Plane, Landmark, Lightbulb } from 'lucide-react';
 import CountUp from '@/components/CountUp';
 
 /* ======= HEADER ======= */
@@ -84,19 +86,23 @@ function Header() {
             }}>Join as Lawyer</Link>
           </div>
 
-          {/* Mobile Hamburger */}
-          <button
-            className="mobile-only"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            style={{
-              width: 44, height: 44, borderRadius: 12,
-              display: 'none', alignItems: 'center', justifyContent: 'center',
-              background: scrolled ? '#F1F5F9' : 'rgba(255,255,255,0.1)',
-              color: scrolled ? '#0F172A' : '#fff',
-            }}
-          >
-            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          {/* Mobile Actions */}
+          <div className="mobile-only" style={{ display: 'none', alignItems: 'center', gap: 12 }}>
+            <Link href="/find-lawyers" style={{ color: scrolled ? '#0F172A' : '#fff', display: 'flex' }}>
+              <Search size={22} />
+            </Link>
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              style={{
+                width: 44, height: 44, borderRadius: 12,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: scrolled ? '#F1F5F9' : 'rgba(255,255,255,0.1)',
+                color: scrolled ? '#0F172A' : '#fff', border: 'none'
+              }}
+            >
+              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -181,7 +187,6 @@ function Footer() {
               ))}
             </div>
           </div>
-          {/* Company links */}
           <div>
             <h4 style={{ fontSize: 14, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 16, color: '#94A3B8' }}>Company</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -220,7 +225,19 @@ function Footer() {
 
 /* ======= HERO SECTION ======= */
 function HeroSection() {
+  const router = useRouter();
+  const [search, setSearch] = useState('');
   const featured = lawyers.filter(l => l.featured).slice(0, 3);
+
+  const handleSearch = (q?: string) => {
+    const query = q || search;
+    if (query.trim()) {
+      router.push(`/find-lawyers?s=${encodeURIComponent(query)}`);
+    } else {
+      router.push('/find-lawyers');
+    }
+  };
+
   return (
     <section className="hero-gradient" style={{ minHeight: '100vh', paddingTop: 80, position: 'relative', overflow: 'hidden' }}>
       {/* Background decoration */}
@@ -257,15 +274,15 @@ function HeroSection() {
           </p>
 
           <div className="animate-slideUp" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 40, animationDelay: '0.2s' }}>
-            <Link href="/find-lawyers" className="btn-press" style={{
+            <button onClick={() => handleSearch()} className="btn-press" style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '16px 32px', borderRadius: 14, fontSize: 16, fontWeight: 600,
-              color: '#0F172A', background: '#fff',
+              color: '#0F172A', background: '#fff', border: 'none',
               boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
               transition: 'all 0.2s',
             }}>
               <Search size={18} /> Find a Lawyer
-            </Link>
+            </button>
             <Link href="/auth/register-lawyer" className="btn-press" style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '16px 32px', borderRadius: 14, fontSize: 16, fontWeight: 600,
@@ -305,16 +322,22 @@ function HeroSection() {
               border: '1px solid #E2E8F0', marginBottom: 16,
             }}>
               <Search size={18} color="#64748B" />
-              <input placeholder="Search lawyer, practice area, court…" style={{
-                flex: 1, border: 'none', background: 'transparent',
-                fontSize: 14, color: '#0F172A', outline: 'none',
-              }} />
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                placeholder="Search lawyer, practice area, court…"
+                style={{
+                  flex: 1, border: 'none', background: 'transparent',
+                  fontSize: 14, color: '#0F172A', outline: 'none',
+                }}
+              />
             </div>
 
             {/* Filter Chips */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
               {['Family Law', 'Criminal', 'Property', 'Corporate', 'High Court', 'Budget Consult'].map(c => (
-                <span key={c} style={{
+                <span key={c} onClick={() => handleSearch(c)} style={{
                   padding: '6px 14px', borderRadius: 999, fontSize: 12, fontWeight: 500,
                   background: '#EEF2FF', color: '#3730A3', cursor: 'pointer',
                   transition: 'all 0.2s',
@@ -397,21 +420,25 @@ function PracticeAreasSection() {
           <p style={{ fontSize: 16, color: '#64748B', marginTop: 12, maxWidth: 520, marginLeft: 'auto', marginRight: 'auto' }}>Find lawyers specialized in your area of need</p>
         </div>
         <div className="stagger-children" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 20 }}>
-          {practiceAreas.map(pa => (
-            <Link href="/find-lawyers" key={pa.id} className="card-hover shadow-premium" style={{
-              background: '#fff', borderRadius: 24, padding: 24,
-              border: '1px solid #E2E8F0', cursor: 'pointer',
-              display: 'flex', flexDirection: 'column', gap: 12,
-              textDecoration: 'none',
-            }}>
-              <div style={{ width: 48, height: 48, borderRadius: 16, background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1D4ED8' }}>
-                <Scale size={24} />
-              </div>
-              <h3 style={{ fontSize: 17, fontWeight: 600, color: '#0F172A' }}>{pa.name}</h3>
-              <p style={{ fontSize: 13, color: '#64748B', lineHeight: 1.6 }}>{pa.description}</p>
-              <span style={{ fontSize: 12, fontWeight: 600, color: '#1D4ED8' }}>{pa.count} lawyers →</span>
-            </Link>
-          ))}
+          {practiceAreas.map(pa => {
+            const iconsMap: any = { Users, Gavel, FileText, Briefcase, Home, Banknote, HardHat, Shield, Plane, Landmark, Lightbulb, ShieldCheck };
+            const Icon = iconsMap[pa.icon] || Scale;
+            return (
+              <Link href="/find-lawyers" key={pa.id} className="card-hover shadow-premium" style={{
+                background: '#fff', borderRadius: 24, padding: 24,
+                border: '1px solid #E2E8F0', cursor: 'pointer',
+                display: 'flex', flexDirection: 'column', gap: 12,
+                textDecoration: 'none',
+              }}>
+                <div style={{ width: 48, height: 48, borderRadius: 16, background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1D4ED8' }}>
+                  <Icon size={24} />
+                </div>
+                <h3 style={{ fontSize: 17, fontWeight: 600, color: '#0F172A' }}>{pa.name}</h3>
+                <p style={{ fontSize: 13, color: '#64748B', lineHeight: 1.6 }}>{pa.description}</p>
+                <span style={{ fontSize: 12, fontWeight: 600, color: '#1D4ED8' }}>{pa.count} lawyers →</span>
+              </Link>
+            )
+          })}
         </div>
       </div>
     </section>

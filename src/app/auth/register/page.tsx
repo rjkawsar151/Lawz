@@ -1,8 +1,10 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
+    const router = useRouter();
     const [formData, setFormData] = useState({ name: '', email: '', phone: '', password: '' });
 
     return (
@@ -21,7 +23,7 @@ export default function RegisterPage() {
                 <div style={{ width: '100%', maxWidth: 420 }}>
                     <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 28, fontWeight: 700, color: '#0F172A', marginBottom: 8 }}>Create account</h2>
                     <p style={{ fontSize: 15, color: '#64748B', marginBottom: 32 }}>Start your legal journey with LAWZ</p>
-                    <form onSubmit={e => e.preventDefault()} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    <form onSubmit={e => { e.preventDefault(); router.push('/'); }} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                         <div>
                             <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', display: 'block', marginBottom: 6 }}>Full Name</label>
                             <input value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Enter your full name" style={{ width: '100%', padding: '14px 16px', borderRadius: 16, border: '1px solid #E2E8F0', fontSize: 14, color: '#0F172A', background: '#F8FAFC' }} />

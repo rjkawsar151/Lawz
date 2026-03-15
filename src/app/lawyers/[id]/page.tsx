@@ -3,26 +3,49 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { lawyers, reviews, posts } from '@/data/mockData';
-import { MapPin, Landmark, Calendar, Star, Clock, ClipboardList, Building2, Video, Diamond, MessageSquare, Heart, Share2, CheckCircle2, Flag } from 'lucide-react';
+import { MapPin, Landmark, Calendar, Star, Clock, ClipboardList, Building2, Video, Diamond, MessageSquare, Heart, Share2, CheckCircle2, Flag, Search, Menu, X } from 'lucide-react';
+
 
 function Header() {
+    const [mobileOpen, setMobileOpen] = useState(false);
     return (
-        <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, height: 80, background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(16px)', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ maxWidth: 1320, width: '100%', margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, #1D4ED8, #06B6D4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 18, color: '#fff' }}>L</div>
-                    <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 24, color: '#0F172A', letterSpacing: '-0.5px' }}>LAWZ</span>
-                </Link>
-                <nav style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
-                    <Link href="/" style={{ fontSize: 15, fontWeight: 500, color: '#475569' }}>Home</Link>
-                    <Link href="/find-lawyers" style={{ fontSize: 15, fontWeight: 500, color: '#475569' }}>Find Lawyers</Link>
-                    <Link href="/community" style={{ fontSize: 15, fontWeight: 500, color: '#475569' }}>Community</Link>
-                </nav>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <Link href="/auth/login" style={{ padding: '10px 20px', borderRadius: 14, fontSize: 14, fontWeight: 600, color: '#475569', border: '1px solid #E2E8F0' }}>Sign In</Link>
+        <>
+            <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000, height: 80, background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(16px)', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ maxWidth: 1320, width: '100%', margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg, #1D4ED8, #06B6D4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 18, color: '#fff' }}>L</div>
+                        <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 24, color: '#0F172A', letterSpacing: '-0.5px' }}>LAWZ</span>
+                    </Link>
+                    <nav style={{ display: 'flex', alignItems: 'center', gap: 32 }} className="desktop-nav">
+                        {[{ label: 'Home', href: '/' }, { label: 'Find Lawyers', href: '/find-lawyers' }, { label: 'Community', href: '/community' }, { label: 'Resources', href: '/resources' }].map(item => (
+                            <Link key={item.href} href={item.href} style={{ fontSize: 15, fontWeight: 500, color: '#475569' }}>{item.label}</Link>
+                        ))}
+                    </nav>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }} className="desktop-nav">
+                        <Link href="/auth/login" style={{ padding: '10px 20px', borderRadius: 14, fontSize: 14, fontWeight: 600, color: '#475569', border: '1px solid #E2E8F0' }}>Sign In</Link>
+                        <Link href="/auth/register-lawyer" style={{ padding: '10px 20px', borderRadius: 14, fontSize: 14, fontWeight: 600, color: '#fff', background: '#1D4ED8' }}>Join as Lawyer</Link>
+                    </div>
+                    <div className="mobile-only" style={{ display: 'none', alignItems: 'center', gap: 12 }}>
+                        <Link href="/find-lawyers" style={{ color: '#0F172A', display: 'flex' }}><Search size={22} /></Link>
+                        <button onClick={() => setMobileOpen(!mobileOpen)} style={{ width: 44, height: 44, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F1F5F9', color: '#0F172A', border: 'none' }}>
+                            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+                        </button>
+                    </div>
                 </div>
-            </div>
-        </header>
+            </header>
+            {mobileOpen && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 999, background: 'rgba(15,23,42,0.5)', backdropFilter: 'blur(4px)' }} onClick={() => setMobileOpen(false)}>
+                    <div style={{ position: 'absolute', top: 0, right: 0, width: '85%', maxWidth: 360, height: '100%', background: '#fff', padding: '96px 24px 24px', animation: 'slideIn 0.3s ease-out' }} onClick={e => e.stopPropagation()}>
+                        <nav style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            {[{ label: 'Home', href: '/' }, { label: 'Find Lawyers', href: '/find-lawyers' }, { label: 'Community', href: '/community' }, { label: 'Resources', href: '/resources' }].map(item => (
+                                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} style={{ padding: '14px 16px', borderRadius: 14, fontSize: 16, fontWeight: 500, color: '#0F172A', display: 'block' }}>{item.label}</Link>
+                            ))}
+                        </nav>
+                    </div>
+                </div>
+            )}
+            <style jsx>{`@media (max-width: 768px) { .desktop-nav { display: none !important; } .mobile-only { display: flex !important; } }`}</style>
+        </>
     );
 }
 
