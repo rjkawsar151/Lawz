@@ -6,7 +6,7 @@ A comprehensive README is essential for showcasing the functionality, tech stack
 
 **LAWZ** is a specialized platform designed to bridge the gap between legal professionals and clients. It provides a centralized directory where users can discover lawyers, book consultations (online or in-person), and engage in legal discussions through a community-driven comment system.
 
-**Live Demo:** [lawz.vercel.app]([https://www.lawz.vercel.app](https://lawz.vercel.app/))
+**Live Demo:** [lawz.vercel.app]([https://www.google.com/search?q=https://lawz.vercel.app](https://lawz.vercel.app/)
 
 ## ⚖️ About The Project
 
@@ -113,4 +113,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-**Developed by **Md. Kawsar**** *Connecting People with Justice.*
+**Developed by Md. Kawsar** *Connecting People with Justice.*
